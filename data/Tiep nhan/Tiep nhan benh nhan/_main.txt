@@ -1,0 +1,4 @@
+﻿Tiếp nhận BN bằng Mã BN|Bệnh nhân đã có thông tin trong hệ thống|X
+Tiếp nhận BN mã QR code thẻ BHYT
+Tiếp nhận BN bằng Họ&Tên (BN không trùng họ tên)|Họ và tên chưa tồn tại trong hệ thống
+Tiếp nhận BN bằng Họ&Tên (BN trùng tên)|Họ và tên đã tồn tại trong hệ thống|X

@@ -1,198 +1,205 @@
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
 #NoTrayIcon
 FileEncoding, utf-8
-;Test git on VSCode
-;test2
-func_Add(filepath, line, string1, String2)
-{
-	string := autoTrimString(string1) . "|" . autoTrimString(string2)
-	Loop, Read, %filepath%, %A_ScriptDir%\tmp.txt
-	{
-		If (A_index = line)
-			var := string "`n"A_LoopReadLine
-		Else
-			var := A_LoopReadLine
-		If (var <>"")
-			FileAppend, %var%`n
-	}
-	FileDelete,%filepath%
-	FileMove, %A_ScriptDir%\tmp.txt, %filepath%
-    Return
-}
-func_edit(filepath, line, string)
-{
-    Loop, Read, %filepath%, %A_ScriptDir%\tmp.txt
-	{
-		If (A_index = line)
-			var := string
-		Else
-			var := A_LoopReadLine
-		If (var <> "")
-			FileAppend, %var%`n
-	}
-	FileDelete,%filepath%
-	FileMove, %A_ScriptDir%\tmp.txt, %filepath%
-    Return
-}
-func_Del(filepath, line)
-{
-	Loop, Read, %filepath%, %A_ScriptDir%\tmp.txt
-	{
-		If (A_index = line)
-			var := ""
-		Else
-			var := A_LoopReadLine
-		If (var <> "")
-			FileAppend, %var%`n
-	}
-	FileDelete,%filepath%
-	FileMove, %A_ScriptDir%\tmp.txt, %filepath%
-    Return
-}
-checkExistString(string, xpath)
-{
-	Statu = 0
-	Loop {
-		If ErrorLevel
-			Break
-		FileReadLine, OutputVar, %xpath%, %A_Index%
-		Loop, Parse, OutputVar, `|
-		{
-			If (A_index = 1)
-				If (A_LoopField = String)
-					Return True
-		}
-	}
-	return False
-}
+
 ;Khởi tao chức năng
-initChucnang()
+get_Function()
 {
-	iString := ""
-	Module := Bodau(module)
-	xpath = %A_ScriptDir%\data\%module%\_main.txt
+	funcList := ""
+	xpath = %A_ScriptDir%\data\%_module%\_main.txt
+	Gui, Main:ListView, lvFunc
+	LV_Delete()
 	Loop,
 	{
-		
 		FileReadLine, var, %xpath%, %A_Index%
 		If ErrorLevel
 			Break
-		iString .= var . "|"
+		funcList .= var . "|"
 	}
-	Return, iString
+	Return % funcList
 }
 ;Khởi tạo listview TestCase
 init_TestCase()
 {
-	module := Bodau(module)
-	chucnang := Bodau(chucnang)
-	Path = %A_ScriptDir%\data\%module%\%chucnang%\_main.txt
-	Gui, Main:ListView, MyListV
+	xPath = %A_ScriptDir%\data\%_module%\%_function%\_main.txt
+	Gui, Main:ListView, lvTestCase
 	LV_Delete()
     Loop
     {
-        FileReadLine, var, %Path%, %A_Index%
+		TC_name := TC_Pre := TC_AUTO := ""
+        FileReadLine, var, %xPath%, %A_Index%
         If ErrorLevel
             Break
 		If (A_Index < 10)
 			stt := "0" . A_Index
 		Else
 			stt := A_Index
-        LV_Add("",Checked, stt, var)
+		Loop, Parse, var, `|
+		{
+			Switch A_Index
+			{
+				Case 1:
+					TC_name := A_LoopField
+				Case 2:
+					TC_pre := A_LoopField
+				Case 3:
+					TC_AUTO := A_LoopField
+			}
+		}
+        LV_Add("",Checked, stt, TC_name, TC_pre, TC_AUTO)
     }
 }
 ;Khởi tạo listview Test Step
-init_TestStep(module, chucnang, TestCasename)
+init_TestStep()
 {
-	module := Bodau(module)
-	chucnang := Bodau(chucnang)
-	TestCasename := Bodau(TestCasename)
-	xpath = %A_ScriptDir%\data\%module%\%chucnang%\%TestCasename%.txt
-	Gui, Main:ListView, myListV2
+	xpath = %A_ScriptDir%\data\%_module%\%_function%\%_TestCasename%.txt
+	Gui, Main:ListView, lvTestStep
 	LV_Delete()
 	Loop, 
 	{
+		tstep_name := tstep_ex := tstep_ac := tstep_status := ""
 		FileReadLine, var, %xpath%, %A_Index%
 		If ErrorLevel
 			Break
+		Loop, Parse, var, `|
+		{
+			Switch A_Index
+			{
+				Case 1:
+					tstep_name := A_LoopField
+				Case 2:
+					tstep_ex := A_LoopField
+				Case 3:
+					tstep_ac := A_LoopField
+				Case 4:
+					tstep_status := A_LoopField
+			}
+		}
 		If (A_Index < 10)
 			stt := "0" . A_Index
 		Else
 			stt := A_Index
-		LV_Add("", stt, var)
+		If (Var <> "")
+			LV_Add("", stt, tstep_name, tstep_ex, tstep_ac, tstep_status)
 	}
 }
 ;XỬ TRÍ TESTCASE
 ;Thêm mới một TestCase của một chức năng đang chọn
-AddTestCase(chucnang, string)
+AddTestCase(string)
 {
-	xpath = %A_ScriptDir%\data\%chucnang%\_main.txt
+	xpath = %A_ScriptDir%\data\%_module%\%_function%\_main.txt
 	FileAppend, %String%`n, %xpath%
+	Return
 }
-EdiTestCase(chucnang, oldstring, newstring)
+
+EdiTestCase(old_TCName, new_TCname)
 {
-
+	_old_TCName := bodau(old_TCName)
+	_new_TCname := bodau(new_TCname)
+	xpath = %A_ScriptDir%\data\%_module%\%_function%\_main.txt
+	tpath = %A_ScriptDir%\data\%_module%\%_function%\tmp.txt
+	Loop, read, %xpath%, %tpath%
+	{
+		If (A_LoopReadLine = old_TCName)
+			var := new_TCname
+		Else
+			var := A_LoopReadLine
+		FileAppend, %var%`n
+	}
+	FileDelete, %xpath%
+	FileMove, %tpath%, %xpath%
+	FileMove, %A_ScriptDir%\data\%_module%\%_function%\%_old_TCName%.txt, %A_ScriptDir%\data\%_module%\%_function%\%_new_TCname%.txt, R
 }
-
+DelTestCase(TCName)
+{
+	_TCname := bodau(TCName)
+	xpath = %A_ScriptDir%\data\%_module%\%_function%\_main.txt
+	Loop, read, %xpath%, %A_ScriptDir%\data\%_module%\%_function%\tmp.txt
+	{
+		If (A_LoopReadLine = TCName)
+			var := ""
+		Else
+			var := A_LoopReadLine
+		If (var <> "")
+			FileAppend, %var%`n
+	}
+	FileDelete, %xpath%
+	FileMove, %A_ScriptDir%\data\%_module%\%_function%\tmp.txt, %xpath%
+	FileDelete, %A_ScriptDir%\data\%_module%\%_function%\%_TCname%.txt
+}
 ;XỬ LÝ TESTSTEP
 
 
-AddTestStep(module, Chucnang, TestCasename, String)
+AddTestStep(String)
 {
-	module := bodau(module)
-	Chucnang := Bodau(Chucnang)
-	TestCasename := Bodau(TestCasename)
-	FileAppend, `n%String%, %A_ScriptDir%\data\%module%\%chucnang%\%TestCasename%.txt
+	FileAppend, %String%`n, %A_ScriptDir%\data\%_module%\%_function%\%_TestCasename%.txt
+	Return
 }
 
-
-InsertTestStep(Chucnang, TestCasename, String)
+InsertTestStep(i, String)
 {
-	Chucnang := Bodau(Chucnang)
-	TestCasename := Bodau(TestCasename)
-	xpath = %A_ScriptDir%\data\%chucnang%\%TestCasename%.txt
-	Loop,
+	xpath = %A_ScriptDir%\data\%_module%\%_function%\%_TestCasename%.txt
+	tpath = %A_ScriptDir%\data\%_module%\%_function%\tmp.txt
+	Loop, read, %xpath%, %tpath%
 	{
-		If (A_Index = Y)
-			FileAppend, `n%String%`n, %A_ScriptDir%\data\%chucnang%\%TestCasename%.txt
-		
-	}
-}
-Edit_TestStep(chucnang, TestCaseName, TestStepline, String)
-{
-	iname := Bodau(TestCasename)
-	xpath = %A_ScriptDir%\data\%chucnang%\%iname%.txt
-	Loop, Read, %xpath%, %A_ScriptDir%\data\%chucnang%\tmp.txt
-	{
-		If (A_index = TestStepline)
-			var := string	
+		If (A_Index = i) {
+			var := string . "`n" . A_LoopReadLine
+		}
 		Else
 			var := A_LoopReadLine
-		If (var <> "")
-			FileAppend, %var%`n
+		FileAppend, %var%`n, %tPath%
 	}
-	FileDelete, %xpath%
-	FileMove, %A_ScriptDir%\data\%chucnang%\tmp.txt, %xpath%
-    Return
-}
-Del_TestStep(chucnang, TestCaseName, TestStepline)
-{
-	iname := Bodau(TestCasename)
-	xpath = %A_ScriptDir%\data\%chucnang%\%iname%.txt
-	Loop, Read, %xpath%, %A_ScriptDir%\data\%chucnang%\tmp.txt
-	{
-		If (A_index = TestStepline)
-			var := ""	
-		Else
-			var := A_LoopReadLine
-		If (var <> "")
-			FileAppend, %var%`n
-	}
-	FileDelete, %xpath%
-	FileMove, %A_ScriptDir%\data\%chucnang%\tmp.txt, %xpath%
+	FileDelete, %xPath%
+	FileMove, %tPath%, %xPath%
     Return
 }
 
+EditTestStep(ID, string)
+{
+	xPath = %A_ScriptDir%\data\%_module%\%_function%\%_TestCaseName%.txt
+	tPath = %A_ScriptDir%\data\%_module%\%_function%\tmp.txt
+	Loop, Read, %xPath%, %tPath%
+	{
+		If (A_Index = ID)
+			var := string
+		Else
+			var := A_LoopReadLine
+		FileAppend, %var%`n, %tPath%
+	}
+	FileDelete, %xPath%
+	FileMove, %tPath%, %xPath%
+	Return
+}
+DelTestStep(TSID)
+{
+	xPath = %A_ScriptDir%\data\%_module%\%_function%\%_TestCaseName%.txt
+	tPath = %A_ScriptDir%\data\%_module%\%_function%\tmp.txt
+	Loop, Read, %xPath%, %tPath%
+	{
+		If (A_Index = TSID)
+			var := ""
+		Else
+			var := A_LoopReadLine
+		If (var <> "")
+			FileAppend, %var%`n, %tPath%
+	}
+	FileDelete, %xPath%
+	FileMove, %tPath%, %xPath%
+    Return
+}
+
+CheckDup(string)
+{
+	Loop
+	{
+		FileReadLine, var, %A_ScriptDir%\data\%_module%\%_function%\_main.txt, %A_Index%
+		If ErrorLevel
+			Break
+		If (var = string)
+			Return True
+	}
+	Return false
+}
 
 SortFile(xpath)
 {

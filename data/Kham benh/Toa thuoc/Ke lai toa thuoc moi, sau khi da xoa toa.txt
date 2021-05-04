@@ -1,0 +1,4 @@
+﻿Chọn BN BHYT khám, nhập ICD|Thành công|Như mong đợi|Pass
+Chuyển sang tab "Toa thuốc", kê 1 thuốc A|Có lịch sử toa thuốc|Như mong đợi|Pass
+Xóa thuốc A đã kê|mất lịch sử toa thuốc|Như mong đợi|Pass
+Kê lại thuốc B|Có lịch sử toa thuốc|Không có lịch sử toa|Fail

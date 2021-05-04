@@ -1,0 +1,2 @@
+﻿Vào màn hình tiếp nhận bệnh nhân|||Pass
+Tại ô Họ và tên, Nhập mã bệnh nhân -> Nhấn ENTER|Phần mềm lấy lên thông tin bệnh nhân|Như mong đợi|Pass
